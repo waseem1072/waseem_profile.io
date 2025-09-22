@@ -78,7 +78,7 @@
         const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
         try {
             await fetch(N8N_WEBHOOK_URL, {
-                method: "GET",
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     message,
@@ -153,6 +153,7 @@
     // Expose for debugging
     window.chatbot = { config: chatbotConfig, openChat, closeChat };
 })(window);
+
 
 
 
