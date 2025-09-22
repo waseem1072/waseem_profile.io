@@ -73,24 +73,51 @@
         );
     }
 
-    // 🔗 Send message to N8N webhook
-    async function sendToN8N(message) {
-        const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
-        try {
-            await fetch(N8N_WEBHOOK_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message,
-                    page: chatbotConfig.page,
-                    user: chatbotConfig.user || null,
-                    timestamp: new Date().toISOString()
-                })
-            });
-        } catch (err) {
-            console.warn("N8N webhook failed:", err);
-        }
+    // // 🔗 Send message to N8N webhook
+    // async function sendToN8N(message) {
+    //     const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
+    //     try {
+    //         await fetch(N8N_WEBHOOK_URL, {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({
+    //                 message,
+    //                 page: chatbotConfig.page,
+    //                 user: chatbotConfig.user || null,
+    //                 timestamp: new Date().toISOString()
+    //             })
+    //         });
+    //     } catch (err) {
+    //         console.warn("N8N webhook failed:", err);
+    //     }
+    // }
+
+
+// 🔗 Send message to N8N webhook and get response
+async function sendToN8N(message) {
+    const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
+    try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message,
+                page: chatbotConfig.page,
+                user: chatbotConfig.user || null,
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        // expect JSON reply from n8n
+        const data = await response.json();
+        return data.reply || "No response from bot.";
+    } catch (err) {
+        console.warn("N8N webhook failed:", err);
+        return "Bot is not responding right now.";
     }
+}
+
+    
 
     // // Send to AI backend (Gemini/OpenAI)
     // async function sendToAI(message) {
@@ -153,6 +180,7 @@
     // Expose for debugging
     window.chatbot = { config: chatbotConfig, openChat, closeChat };
 })(window);
+
 
 
 
