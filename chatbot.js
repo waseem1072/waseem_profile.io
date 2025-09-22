@@ -75,7 +75,7 @@
 
     // 🔗 Send message to N8N webhook
     async function sendToN8N(message) {
-        const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook-test/16849e3c-ee6b-4810-9f04-b371861da78d";
+        const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
         try {
             await fetch(N8N_WEBHOOK_URL, {
                 method: "GET",
@@ -153,6 +153,7 @@
     // Expose for debugging
     window.chatbot = { config: chatbotConfig, openChat, closeChat };
 })(window);
+
 
 
 
