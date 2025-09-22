@@ -114,6 +114,14 @@ async function sendToN8N(message) {
     } catch (err) {
         console.warn("N8N webhook failed:", err);
         return "Bot is not responding right now.";
+
+        async function handleUserMessage(userMessage) {
+    addMessageToUI("You", userMessage);
+
+    const botReply = await sendToN8N(userMessage);
+    addMessageToUI("Bot", botReply);
+}
+
     }
 }
 
@@ -180,6 +188,7 @@ async function sendToN8N(message) {
     // Expose for debugging
     window.chatbot = { config: chatbotConfig, openChat, closeChat };
 })(window);
+
 
 
 
