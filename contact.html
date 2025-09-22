@@ -1,0 +1,177 @@
+<!--
+============================
+ Contact Page - My Store (Modern, Accessible, UI/UX Best Practices)
+============================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact - My Store</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .contact-container {
+            width: min(500px, 96%);
+            margin: 48px auto 0 auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 32px 24px 40px 24px;
+        }
+        .contact-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        .contact-desc {
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .contact-form label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+            font-size: 1rem;
+            background: var(--input-bg, #f8fafd);
+            color: var(--text);
+        }
+        .contact-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .contact-form button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            color: #0a1220;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+        .contact-form button:focus, .contact-form button:hover {
+            background: var(--accent, #4f8cff);
+            color: #fff;
+            box-shadow: 0 0 0 3px var(--accent, #4f8cff);
+            outline: none;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .contact-success {
+            background: #e6f9ed;
+            color: #1a7f37;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 18px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        @media (max-width: 600px) {
+            .contact-container { padding: 18px 6px 24px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header" role="banner">
+        <div class="container header-inner">
+            <div class="brand">
+                <span class="logo" aria-hidden="true">🛍️</span>
+                <h1 class="title">My Store</h1>
+            </div>
+            <nav class="header-actions" aria-label="Main navigation">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link">Products</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="contact.html" class="nav-link active" aria-current="page">Contact</a>
+            </nav>
+        </div>
+    </header>
+    <main id="main-content" tabindex="-1">
+        <section class="contact-container" aria-labelledby="contactTitle">
+            <h2 class="contact-title" id="contactTitle">Contact Us</h2>
+            <p class="contact-desc">Have a question, feedback, or need support? Fill out the form below and our team will get back to you soon.</p>
+            <form class="contact-form" id="contactForm" autocomplete="off" novalidate>
+                <label for="contactName">Your Name</label>
+                <input type="text" id="contactName" name="name" required placeholder="Enter your name" aria-required="true" />
+                <label for="contactEmail">Your Email</label>
+                <input type="email" id="contactEmail" name="email" required placeholder="Enter your email" aria-required="true" />
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" required placeholder="How can we help you?" aria-required="true"></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+            <div class="contact-success" id="contactSuccess" role="status">Thank you! Your message has been sent.</div>
+        </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+        <div class="container footer-inner">
+            <p>© <span id="year"></span> My Store. All rights reserved.</p>
+        </div>
+    </footer>
+    <!-- Chat Widget: Accessible, keyboard-friendly, and ARIA-labeled -->
+    <button id="chatToggle" class="chat-toggle" aria-label="Open chat" aria-haspopup="dialog">💬</button>
+    <div id="chatWidget" class="chat-widget" hidden role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+        <div class="chat-header">
+            <div class="chat-title" id="chatTitle">Chat with us</div>
+            <button id="chatClose" class="chat-close" aria-label="Close chat">×</button>
+        </div>
+        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+        <form id="chatForm" class="chat-form" autocomplete="off">
+            <input id="chatInput" class="chat-input" type="text" placeholder="Type your message..." aria-label="Type your message" required />
+            <button class="chat-send" type="submit">Send</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+        // Contact form submission (demo only)
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // In production, send data to backend here
+            document.getElementById('contactSuccess').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('contactSuccess').style.display = 'none';
+                document.getElementById('contactForm').reset();
+            }, 3500);
+        });
+        window.chatbotConfig = {
+          page: 'contact',
+          productList: [
+            { name: 'Sneakers', url: 'products.html#sneakers' },
+            { name: 'Handbag', url: 'products.html#handbag' },
+            { name: 'Smart Watch', url: 'products.html#smartwatch' },
+            { name: 'Earbuds', url: 'products.html#earbuds' },
+            { name: 'Jacket', url: 'products.html#jacket' },
+            { name: 'Backpack', url: 'products.html#backpack' },
+            { name: 'Sunglasses', url: 'products.html#sunglasses' },
+            { name: 'Shoes', url: 'products.html#shoes' },
+            { name: 'Wireless Headphones', url: 'products.html#headphones' },
+            { name: 'Mechanical Keyboard', url: 'products.html#keyboard' },
+            { name: '4K Monitor', url: 'products.html#monitor' },
+            { name: 'Gaming Mouse', url: 'products.html#mouse' },
+            { name: 'Bluetooth Speaker', url: 'products.html#speaker' },
+            { name: 'Laptop Stand', url: 'products.html#laptopstand' },
+            { name: 'Noise Cancelling Earbuds', url: 'products.html#noisecancelling' },
+            { name: 'Fitness Tracker', url: 'products.html#fitnesstracker' },
+            { name: 'HD Webcam', url: 'products.html#webcam' },
+            { name: 'E-reader', url: 'products.html#ereader' },
+            { name: 'Action Camera', url: 'products.html#actioncamera' }
+          ]
+        };
+    </script>
+    <script src="chatbot.js"></script>
+</body>
+</html>

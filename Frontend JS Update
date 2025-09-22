@@ -1,0 +1,14 @@
+async function sendToOpenAI(message) {
+    try {
+        const response = await fetch('http://localhost:3001/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        return data.reply || 'Sorry, I could not process your request.';
+    } catch (err) {
+        console.error(err);
+        return 'Chat server not available.';
+    }
+}

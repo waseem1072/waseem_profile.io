@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home - My Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Keep your existing CSS here... */
+    .msg { margin: 6px 0; padding: 8px 12px; border-radius: 12px; max-width: 80%; }
+    .msg.user { background: #007bff; color: #fff; margin-left: auto; }
+    .msg.bot { background: #f1f1f1; color: #333; margin-right: auto; }
+    .chat-widget.open { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Your header, hero, features, footer stay as-is -->
+
+  <!-- Chat Widget -->
+  <button id="chatToggle" class="chat-toggle" aria-label="Open chat">💬</button>
+  <div id="chatWidget" class="chat-widget" hidden>
+    <div class="chat-header">
+      <div class="chat-title">Chat with us</div>
+      <button id="chatClose" class="chat-close" aria-label="Close chat">×</button>
+    </div>
+    <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+    <form id="chatForm" class="chat-form" autocomplete="off">
+      <input id="chatInput" class="chat-input" type="text" placeholder="Type your message..." aria-label="Type your message" required />
+      <button class="chat-send" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const GEMINI_API_KEY = "AIzaSyBLDV6B3tI2Ze_YVqZ8qBlNVZIgp9bLhTU"; // replace with your real key
+    const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+
+    const chatDom = {
+      toggle: document.getElementById("chatToggle"),
+      widget: document.getElementById("chatWidget"),
+      close: document.getElementById("chatClose"),
+      messages: document.getElementById("chatMessages"),
+      form: document.getElementById("chatForm"),
+      input: document.getElementById("chatInput"),
+    };
+
+    function appendMessage(role, text) {
+      const el = document.createElement("div");
+      el.className = `msg ${role}`;
+      el.textContent = text;
+      chatDom.messages.appendChild(el);
+      chatDom.messages.scrollTop = chatDom.messages.scrollHeight;
+    }
+
+    let typingEl = null;
+    function setTyping(visible) {
+      if (visible) {
+        if (!typingEl) {
+          typingEl = document.createElement("div");
+          typingEl.className = "msg bot";
+          typingEl.textContent = "Typing…";
+          chatDom.messages.appendChild(typingEl);
+        }
+      } else if (typingEl) {
+        typingEl.remove();
+        typingEl = null;
+      }
+    }
+
+    function openChat() {
+      chatDom.widget.hidden = false;
+      chatDom.widget.classList.add("open");
+      setTimeout(() => chatDom.input.focus(), 0);
+    }
+
+    function closeChat() {
+      chatDom.widget.classList.remove("open");
+      chatDom.widget.hidden = true;
+    }
+
+    async function sendToGemini(message) {
+      try {
+        const response = await fetch(GEMINI_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: message }]
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const text = await response.text().catch(() => "");
+          throw new Error(text || `Request failed (${response.status})`);
+        }
+
+        const data = await response.json();
+        // Gemini responses are usually inside candidates[0].content.parts[0].text
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "No reply";
+      } catch (error) {
+        console.error("Chat error:", error);
+        return "Sorry, something went wrong.";
+      }
+    }
+
+    if (chatDom.toggle && chatDom.form) {
+      chatDom.toggle.addEventListener("click", openChat);
+      chatDom.close.addEventListener("click", closeChat);
+
+      chatDom.form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const text = chatDom.input.value.trim();
+        if (!text) return;
+        appendMessage("user", text);
+        chatDom.input.value = "";
+        setTyping(true);
+        const reply = await sendToGemini(text);
+        setTyping(false);
+        appendMessage("bot", reply);
+      });
+    }
+  </script>
+</body>
+</html>

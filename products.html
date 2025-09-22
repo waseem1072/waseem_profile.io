@@ -1,0 +1,268 @@
+<!--
+============================
+ Frontend Best Practices (Senior-Level)
+============================
+
+UI/UX:
+- Use a design system or component library for consistency (e.g., Material UI, Ant Design, or custom)
+- Prioritize accessibility (ARIA roles, keyboard navigation, color contrast)
+- Ensure mobile-first, responsive design (media queries, flexible layouts)
+- Optimize images and assets for performance
+
+Componentization:
+- Break UI into reusable, single-responsibility components
+- Use props and state wisely; avoid prop drilling (use context or state management)
+- Keep components pure and stateless where possible
+
+State Management:
+- Use local state for UI, global state for app data (Redux, Zustand, or Context API)
+- Normalize and structure state for scalability
+
+Code Organization:
+- Group files by feature/module, not by type
+- Use clear naming conventions and folder structure
+- Separate logic (hooks, services) from presentation (components)
+
+Testing:
+- Write unit tests for components and utilities (Jest, React Testing Library)
+- Use end-to-end tests for critical flows (Cypress, Playwright)
+
+Performance:
+- Lazy-load components and routes (React.lazy, Suspense)
+- Minimize bundle size (tree-shaking, code splitting)
+- Use memoization (React.memo, useMemo, useCallback)
+
+Accessibility:
+- Use semantic HTML elements
+- Provide alt text for images
+- Test with screen readers
+
+Documentation:
+- Document components, props, and utilities (JSDoc, Storybook)
+- Maintain a clear README and code comments
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products - My Store</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Browse products from My Store" />
+</head>
+<body>
+    <header class="site-header" role="banner">
+        <div class="container header-inner">
+            <div class="brand">
+                <span class="logo" aria-hidden="true">🛍️</span>
+                <h1 class="title">My Store</h1>
+            </div>
+            <nav class="header-actions" aria-label="Main navigation">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link active" aria-current="page">Products</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" id="main-content" tabindex="-1">
+        <section class="controls" aria-label="Product controls">
+            <div class="control-row">
+                <input id="searchInput" class="search" type="search" placeholder="Search products..." aria-label="Search products" />
+                <select id="categoryFilter" class="select" aria-label="Filter by category">
+                    <option value="all">All Categories</option>
+                </select>
+                <select id="sortSelect" class="select" aria-label="Sort products">
+                    <option value="relevance">Sort: Relevance</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name-asc">Name: A to Z</option>
+                    <option value="name-desc">Name: Z to A</option>
+                </select>
+            </div>
+        </section>
+        <section aria-labelledby="productGridTitle">
+            <h2 class="visually-hidden" id="productGridTitle">Product List</h2>
+            <div id="productGrid" class="product-grid" aria-live="polite"></div>
+            <!-- Example product images (can be dynamically rendered by JS) -->
+            <div style="display:none">
+                <img src="https://images.unsplash.com/photo-1513708927688-890fe8c7b8c3?auto=format&fit=crop&w=400&q=80" alt="Sneakers" />
+                <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=400&q=80" alt="Handbag" />
+                <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Smart Watch" />
+                <img src="https://images.unsplash.com/photo-1512499617640-c2f999098c01?auto=format&fit=crop&w=400&q=80" alt="Earbuds" />
+                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Jacket" />
+                <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80" alt="Backpack" />
+                <img src="https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=400&q=80" alt="Sunglasses" />
+                <img src="https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80" alt="Shoes" />
+            </div>
+            <div id="emptyState" class="empty-state" hidden>
+                <p>No products found. Try adjusting your search or filters.</p>
+            </div>
+        </section>
+        <!-- Review Modal -->
+        <div id="reviewModal" class="modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="reviewModalTitle">Leave a Review</h3>
+                    <button id="closeReviewModal" class="close-btn" onclick="closeReviewModal()" aria-label="Close review modal">&times;</button>
+                </div>
+                <form id="reviewForm" class="review-form" onsubmit="submitReview(event)">
+                    <input type="hidden" id="reviewProductId" />
+                    <div class="form-group">
+                        <label for="reviewName">Your Name</label>
+                        <input type="text" id="reviewName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewRating">Rating</label>
+                        <select id="reviewRating" required>
+                            <option value="">Select Rating</option>
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Good</option>
+                            <option value="3">⭐⭐⭐ Average</option>
+                            <option value="2">⭐⭐ Poor</option>
+                            <option value="1">⭐ Terrible</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewText">Your Review</label>
+                        <textarea id="reviewText" rows="4" placeholder="Tell us about your experience with this product..." required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelReview" class="btn-secondary" onclick="closeReviewModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Submit Review</button>
+                    </div>
+                </form>
+                <div id="aiResponse" class="ai-response" hidden>
+                    <div class="ai-response-header">
+                        <h4>🤖 AI Response:</h4>
+                        <button id="closeAiResponse" class="close-ai-btn" onclick="closeAiResponse()" aria-label="Close AI response">&times;</button>
+                    </div>
+                    <p id="aiResponseText"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <div class="container footer-inner">
+            <p>© <span id="year"></span> My Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Chat Widget: Accessible, keyboard-friendly, and ARIA-labeled -->
+    <button id="chatToggle" class="chat-toggle" aria-label="Open chat" aria-haspopup="dialog">💬</button>
+    <div id="chatWidget" class="chat-widget" hidden role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+        <div class="chat-header">
+            <div class="chat-title" id="chatTitle">Chat with us</div>
+            <button id="chatClose" class="chat-close" aria-label="Close chat">×</button>
+        </div>
+        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+        <form id="chatForm" class="chat-form" autocomplete="off">
+            <input id="chatInput" class="chat-input" type="text" placeholder="Type your message..." aria-label="Type your message" required />
+            <button class="chat-send" type="submit">Send</button>
+        </form>
+    </div>
+    <style>
+        /* Sticky navigation */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s;
+        }
+        .site-header:focus-within, .site-header:hover {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        /* Micro-interactions for nav and buttons */
+        .nav-link, .cta-btn, .download-btn, .chat-toggle, .chat-send, .btn-primary, .btn-secondary {
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+            outline: none;
+        }
+        .nav-link:focus, .cta-btn:focus, .download-btn:focus, .chat-toggle:focus, .chat-send:focus, .btn-primary:focus, .btn-secondary:focus {
+            box-shadow: 0 0 0 3px var(--accent, #4f8cff);
+            outline: none;
+        }
+        .nav-link:hover, .cta-btn:hover, .download-btn:hover, .chat-toggle:hover, .chat-send:hover, .btn-primary:hover, .btn-secondary:hover {
+            background: var(--accent, #4f8cff);
+            color: #fff;
+            transform: translateY(-2px) scale(1.03);
+        }
+        /* Animated chatbot open/close */
+        .chat-widget {
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(30px) scale(0.98);
+        }
+        .chat-widget.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        /* Chatbot loading spinner */
+        .chat-spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid var(--accent, #4f8cff);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    /* Visually hidden utility for accessibility */
+    .visually-hidden {
+        position: absolute !important;
+        height: 1px; width: 1px;
+        overflow: hidden;
+        clip: rect(1px, 1px, 1px, 1px);
+        white-space: nowrap;
+        border: 0;
+        padding: 0;
+        margin: -1px;
+    }
+    </style>
+    
+
+    <script src="app.js"></script>
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+      window.chatbotConfig = {
+        page: 'products',
+        productList: [
+          { name: 'Sneakers', url: 'products.html#sneakers' },
+          { name: 'Handbag', url: 'products.html#handbag' },
+          { name: 'Smart Watch', url: 'products.html#smartwatch' },
+          { name: 'Earbuds', url: 'products.html#earbuds' },
+          { name: 'Jacket', url: 'products.html#jacket' },
+          { name: 'Backpack', url: 'products.html#backpack' },
+          { name: 'Sunglasses', url: 'products.html#sunglasses' },
+          { name: 'Shoes', url: 'products.html#shoes' },
+          { name: 'Wireless Headphones', url: 'products.html#headphones' },
+          { name: 'Mechanical Keyboard', url: 'products.html#keyboard' },
+          { name: '4K Monitor', url: 'products.html#monitor' },
+          { name: 'Gaming Mouse', url: 'products.html#mouse' },
+          { name: 'Bluetooth Speaker', url: 'products.html#speaker' },
+          { name: 'Laptop Stand', url: 'products.html#laptopstand' },
+          { name: 'Noise Cancelling Earbuds', url: 'products.html#noisecancelling' },
+          { name: 'Fitness Tracker', url: 'products.html#fitnesstracker' },
+          { name: 'HD Webcam', url: 'products.html#webcam' },
+          { name: 'E-reader', url: 'products.html#ereader' },
+          { name: 'Action Camera', url: 'products.html#actioncamera' }
+        ]
+      };
+    </script>
+    <script src="chatbot.js"></script>
+</body>
+</html>
