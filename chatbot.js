@@ -73,87 +73,52 @@
         );
     }
 
-    // // 🔗 Send message to N8N webhook
-    // async function sendToN8N(message) {
-    //     const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
-    //     try {
-    //         await fetch(N8N_WEBHOOK_URL, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({
-    //                 message,
-    //                 page: chatbotConfig.page,
-    //                 user: chatbotConfig.user || null,
-    //                 timestamp: new Date().toISOString()
-    //             })
-    //         });
-    //     } catch (err) {
-    //         console.warn("N8N webhook failed:", err);
-    //     }
-    // }
-
-
-// 🔗 Send message to N8N webhook and get response
-async function sendToN8N(message) {
-    const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook/16849e3c-ee6b-4810-9f04-b371861da78d";
-    try {
-        const response = await fetch(N8N_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message,
-                page: chatbotConfig.page,
-                user: chatbotConfig.user || null,
-                timestamp: new Date().toISOString()
-            })
-        });
-
-        // expect JSON reply from n8n
-        const data = await response.json();
-        return data.reply || "No response from bot.";
-    } catch (err) {
-        console.warn("N8N webhook failed:", err);
-        return "Bot is not responding right now.";
-
-        async function handleUserMessage(userMessage) {
-    addMessageToUI("You", userMessage);
-
-    const botReply = await sendToN8N(userMessage);
-    addMessageToUI("Bot", botReply);
-}
-
+    // 🔗 Send message to N8N webhook
+    async function sendToN8N(message) {
+        const N8N_WEBHOOK_URL = "https://waseem-c.app.n8n.cloud/webhook-test/cf5218f8-b140-4e24-9622-77a65ed0a13f";
+        try {
+            await fetch(N8N_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message,
+                    page: chatbotConfig.page,
+                    user: chatbotConfig.user || null,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        } catch (err) {
+            console.warn("N8N webhook failed:", err);
+        }
     }
-}
 
-    
-
-    // // Send to AI backend (Gemini/OpenAI)
-    // async function sendToAI(message) {
-    //     const GEMINI_API_KEY = window.GEMINI_API_KEY || "AIzaSyBLDV6B3tI2Ze_YVqZ8qBlNVZIgp9bLhTU";
-    //     const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
-    //     const systemPrompt = getSystemPrompt();
-    //     const fullPrompt = `${systemPrompt}\nUser: ${message}`;
-    //     try {
-    //         const response = await fetch(GEMINI_API_URL, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({
-    //                 contents: [
-    //                     { role: "user", parts: [{ text: fullPrompt }] }
-    //                 ]
-    //             })
-    //         });
-    //         if (!response.ok) {
-    //             const text = await response.text().catch(() => "");
-    //             throw new Error(text || `Request failed (${response.status})`);
-    //         }
-    //         const data = await response.json();
-    //         return data.candidates?.[0]?.content?.parts?.[0]?.text || "No reply.";
-    //     } catch (error) {
-    //         console.error("Chat error:", error);
-    //         return "Sorry, something went wrong.";
-    //     }
-    // }
+    // Send to AI backend (Gemini/OpenAI)
+    async function sendToAI(message) {
+        const GEMINI_API_KEY = window.GEMINI_API_KEY || "AIzaSyBLDV6B3tI2Ze_YVqZ8qBlNVZIgp9bLhTU";
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+        const systemPrompt = getSystemPrompt();
+        const fullPrompt = `${systemPrompt}\nUser: ${message}`;
+        try {
+            const response = await fetch(GEMINI_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [
+                        { role: "user", parts: [{ text: fullPrompt }] }
+                    ]
+                })
+            });
+            if (!response.ok) {
+                const text = await response.text().catch(() => "");
+                throw new Error(text || `Request failed (${response.status})`);
+            }
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No reply.";
+        } catch (error) {
+            console.error("Chat error:", error);
+            return "Sorry, something went wrong.";
+        }
+    }
 
     // Event listeners
     if (chatDom.toggle && chatDom.form) {
@@ -188,10 +153,3 @@ async function sendToN8N(message) {
     // Expose for debugging
     window.chatbot = { config: chatbotConfig, openChat, closeChat };
 })(window);
-
-
-
-
-
-
-

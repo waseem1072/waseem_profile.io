@@ -263,6 +263,14 @@ Documentation:
         ]
       };
     </script>
-    <script src="chatbot.js"></script>
+      <!-- n8n Chat Styles -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<script type="module">
+	import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+	createChat({
+		webhookUrl: 'http://localhost:5678/webhook/6b7bc309-9611-4c6c-b45d-b2b52265d3bf/chat'
+	});
+</script>
 </body>
 </html>

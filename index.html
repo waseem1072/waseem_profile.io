@@ -1,397 +1,229 @@
-<!--
-============================
- Senior-Level Project Structure & Architecture Plan
-============================
-
-Recommended Folder Structure:
-<!--
-============================
- Senior-Level Technology Stack & Tooling Recommendations
-============================
-
-Frontend:
-- Framework: React.js (preferred for componentization, ecosystem, SSR/SPA support)
-- State Management: Redux Toolkit or Zustand (for scalable state)
-- Styling: Tailwind CSS or styled-components (utility-first or CSS-in-JS)
-- Routing: React Router
-- Forms: React Hook Form or Formik
-- Testing: Jest, React Testing Library
-- Linting/Formatting: ESLint, Prettier
-
-Backend:
-- Framework: Node.js with Express.js (API, middleware, scalable)
-- Database: PostgreSQL (relational, scalable) or MongoDB (NoSQL, flexible)
-- ORM: Prisma (for SQL) or Mongoose (for MongoDB)
-- Authentication: Passport.js, JWT, OAuth2
-- API Docs: Swagger/OpenAPI
-- Testing: Jest, Supertest
-
-AI/Chatbot:
-- Gemini API (current), OpenAI API (optional/future)
-- Backend proxy for API key security
-- Product-aware logic in backend service
-
-Analytics & Dashboard:
-- Chart.js (for charts), Mermaid.js (for flowcharts)
-- Optionally: D3.js for advanced visualizations
-
-DevOps/Deployment:
-- Version Control: Git + GitHub
-- CI/CD: GitHub Actions or GitLab CI
-- Hosting: Vercel, Netlify (frontend); Render, Heroku, AWS, or Azure (backend)
-- Environment: .env for secrets, dotenv package
-- Monitoring: Sentry, LogRocket, or Datadog
-
-- Integrate ESLint and Prettier for code quality
-- Prepare for cloud deployment (public URL, HTTPS, CI/CD)
-├── src/
-│   ├── components/        # Reusable UI components (Navbar, ProductCard, Chatbot, etc.)
-│   ├── services/          # API calls, data access, Gemini/OpenAI integration
-│   ├── hooks/             # Custom React/Vue hooks (if using)
-├── backend/               # Node.js/Express backend (API, Gemini proxy, DB logic)
-│   ├── controllers/       # Route handlers
-│
-├── config/                # Environment variables, config files
-- API-driven: All data and AI features accessed via backend API endpoints.
-<!--
-============================
- Frontend Best Practices (Senior-Level)
-============================
-
-UI/UX:
-- Use a design system or component library for consistency (e.g., Material UI, Ant Design, or custom)
-- Prioritize accessibility (ARIA roles, keyboard navigation, color contrast)
-- Ensure mobile-first, responsive design (media queries, flexible layouts)
-- Optimize images and assets for performance
-
-Componentization:
-- Break UI into reusable, single-responsibility components
-- Use props and state wisely; avoid prop drilling (use context or state management)
-- Keep components pure and stateless where possible
-
-State Management:
-- Use local state for UI, global state for app data (Redux, Zustand, or Context API)
-- Normalize and structure state for scalability
-
-Code Organization:
-- Group files by feature/module, not by type
-- Use clear naming conventions and folder structure
-- Separate logic (hooks, services) from presentation (components)
-
-Testing:
-- Write unit tests for components and utilities (Jest, React Testing Library)
-- Use end-to-end tests for critical flows (Cypress, Playwright)
-
-Performance:
-- Lazy-load components and routes (React.lazy, Suspense)
-- Minimize bundle size (tree-shaking, code splitting)
-- Use memoization (React.memo, useMemo, useCallback)
-
-Accessibility:
-- Use semantic HTML elements
-- Provide alt text for images
-- Test with screen readers
-
-Documentation:
-- Document components, props, and utilities (JSDoc, Storybook)
-- Maintain a clear README and code comments
--->
-<!--
-- Scalable: Ready for cloud deployment, CI/CD, and future feature expansion.
-
-Best Practice: Keep this plan updated as your project evolves.-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home - My Store</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Sticky navigation */
-        .site-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--card);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            transition: box-shadow 0.2s;
-        }
-        .site-header:focus-within, .site-header:hover {
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        }
-        /* Micro-interactions for nav and buttons */
-        .nav-link, .cta-btn, .download-btn, .chat-toggle, .chat-send, .btn-primary, .btn-secondary {
-            transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
-            outline: none;
-        }
-        .nav-link:focus, .cta-btn:focus, .download-btn:focus, .chat-toggle:focus, .chat-send:focus, .btn-primary:focus, .btn-secondary:focus {
-            box-shadow: 0 0 0 3px var(--accent, #4f8cff);
-            outline: none;
-        }
-        .nav-link:hover, .cta-btn:hover, .download-btn:hover, .chat-toggle:hover, .chat-send:hover, .btn-primary:hover, .btn-secondary:hover {
-            background: var(--accent, #4f8cff);
-            color: #fff;
-            transform: translateY(-2px) scale(1.03);
-        }
-        /* Animated chatbot open/close */
-        .chat-widget {
-            transition: opacity 0.3s, transform 0.3s;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(30px) scale(0.98);
-        }
-        .chat-widget.open {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0) scale(1);
-        }
-        /* Chatbot loading spinner */
-        .chat-spinner {
-            display: inline-block;
-            width: 22px;
-            height: 22px;
-            border: 3px solid #e0e0e0;
-            border-top: 3px solid var(--accent, #4f8cff);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .hero {
-            text-align: center;
-            padding: 60px 0;
-            background: linear-gradient(135deg, rgba(79, 140, 255, 0.1) 0%, rgba(124, 231, 163, 0.1) 100%);
-            border-radius: 20px;
-            margin: 20px 0;
-        }
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, var(--accent), var(--accent-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--muted);
-            margin-bottom: 30px;
-        }
-        .cta-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .cta-btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-        .cta-primary {
-            background: linear-gradient(90deg, var(--accent), var(--accent-2));
-            color: #0a1220;
-            border: none;
-        }
-        .cta-secondary {
-            background: transparent;
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
-        .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 140, 255, 0.3);
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin: 40px 0;
-        }
-        .feature-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-4px);
-        }
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-        .feature-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .feature-desc {
-            color: var(--muted);
-            line-height: 1.6;
-        }
-        .animated-logo {
-            animation: rotate 10s linear infinite;
-            display: inline-block;
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-           
-        </style>
-</head>
-<body>
-    <header class="site-header" role="banner">
-        <div class="container header-inner">
-            <div class="brand">
-                <span class="logo" aria-hidden="true">🛍️</span>
-                <h1 class="title">My Store</h1>
-            </div>
-            <nav class="header-actions" aria-label="Main navigation">
-                <a href="index.html" class="nav-link active" aria-current="page">Home</a>
-                <a href="products.html" class="nav-link">Products</a>
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="contact.html" class="nav-link">Contact</a>
-            </nav>
-        </div>
-    </header>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home - My Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <main class="container" id="main-content" tabindex="-1">
-        <section class="hero" aria-labelledby="heroTitle">
-            <div class="animated-logo pulse" aria-hidden="true">🛍️</div>
-            <h1 id="heroTitle">Welcome to My Store</h1>
-            <p>Discover amazing products with our AI-powered shopping experience</p>
-            <div class="cta-buttons">
-                <a href="products.html" class="cta-btn cta-primary">Shop Now</a>
-                <a href="dashboard.html" class="cta-btn cta-secondary">View Dashboard</a>
-            </div>
-        </section>
-        <section class="features" aria-labelledby="featuresTitle">
-            <h2 class="visually-hidden" id="featuresTitle">Store Features</h2>
-            <div class="feature-card">
-                <div class="feature-icon" aria-hidden="true">🚀</div>
-                <h3 class="feature-title">Fast Delivery</h3>
-                <p class="feature-desc">Get your orders delivered within 24 hours with our premium shipping service.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon" aria-hidden="true">🤖</div>
-                <h3 class="feature-title">AI Assistant</h3>
-                <p class="feature-desc">Get instant help with our smart chatbot powered by advanced AI technology.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon" aria-hidden="true">💎</div>
-                <h3 class="feature-title">Premium Quality</h3>
-                <p class="feature-desc">All our products are carefully selected and tested for the highest quality standards.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon" aria-hidden="true">📊</div>
-                <h3 class="feature-title">Smart Analytics</h3>
-                <p class="feature-desc">Track your orders and get insights with our comprehensive dashboard system.</p>
-            </div>
-        </section>
-    </main>
+  <style>
+    /* ===== Navigation ===== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card, #fff);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
+    }
+    .site-header:focus-within, .site-header:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .nav-link {
+      padding: 10px 14px;
+      text-decoration: none;
+      color: var(--text, #333);
+      font-weight: 500;
+    }
+    .nav-link:hover {
+      color: var(--accent, #4f8cff);
+    }
 
-    <footer class="site-footer" role="contentinfo">
-        <div class="container footer-inner">
-            <p>© <span id="year"></span> My Store. All rights reserved.</p>
-        </div>
-    </footer>
+    /* ===== Buttons ===== */
+    .cta-btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+    .cta-primary {
+      background: linear-gradient(90deg, var(--accent, #4f8cff), var(--accent-2, #7ce7a3));
+      color: #0a1220;
+      border: none;
+    }
+    .cta-secondary {
+      background: transparent;
+      color: var(--text, #333);
+      border: 2px solid var(--border, #ddd);
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 140, 255, 0.3);
+    }
 
-    <!-- Chat Widget: Accessible, keyboard-friendly, and ARIA-labeled -->
-    <button id="chatToggle" class="chat-toggle" aria-label="Open chat" aria-haspopup="dialog">💬</button>
-    <div id="chatWidget" class="chat-widget" hidden role="dialog" aria-modal="true" aria-labelledby="chatTitle">
-        <div class="chat-header">
-            <div class="chat-title" id="chatTitle">Chat with us</div>
-            <button id="chatClose" class="chat-close" aria-label="Close chat">×</button>
-        </div>
-        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
-        <form id="chatForm" class="chat-form" autocomplete="off">
-            <input id="chatInput" class="chat-input" type="text" placeholder="Type your message..." aria-label="Type your message" required />
-            <button class="chat-send" type="submit">Send</button>
-        </form>
-    </div>
-    <style>
-    /* Visually hidden utility for accessibility */
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding: 60px 0;
+      background: linear-gradient(135deg, rgba(79, 140, 255, 0.1), rgba(124, 231, 163, 0.1));
+      border-radius: 20px;
+      margin: 20px 0;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--accent, #4f8cff), var(--accent-2, #7ce7a3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--muted, #666);
+      margin-bottom: 30px;
+    }
+
+    /* ===== Features ===== */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin: 40px 0;
+    }
+    .feature-card {
+      background: var(--card, #fff);
+      border: 1px solid var(--border, #ddd);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      color: var(--muted, #666);
+      line-height: 1.6;
+    }
+
+    /* ===== Animations ===== */
+    .animated-logo {
+      animation: rotate 10s linear infinite;
+      display: inline-block;
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* ===== Accessibility Utility ===== */
     .visually-hidden {
-        position: absolute !important;
-        height: 1px; width: 1px;
-        overflow: hidden;
-        clip: rect(1px, 1px, 1px, 1px);
-        white-space: nowrap;
-        border: 0;
-        padding: 0;
-        margin: -1px;
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px, 1px, 1px, 1px);
+      white-space: nowrap;
+      border: 0;
+      padding: 0;
+      margin: -1px;
     }
-    </style>
+  </style>
+</head>
 
-    <script>
-      window.chatbotConfig = {
-        page: 'home',
-        productList: [
-          { name: 'Sneakers', url: 'products.html#sneakers' },
-          { name: 'Handbag', url: 'products.html#handbag' },
-          { name: 'Smart Watch', url: 'products.html#smartwatch' },
-          { name: 'Earbuds', url: 'products.html#earbuds' },
-          { name: 'Jacket', url: 'products.html#jacket' },
-          { name: 'Backpack', url: 'products.html#backpack' },
-          { name: 'Sunglasses', url: 'products.html#sunglasses' },
-          { name: 'Shoes', url: 'products.html#shoes' },
-          { name: 'Wireless Headphones', url: 'products.html#headphones' },
-          { name: 'Mechanical Keyboard', url: 'products.html#keyboard' },
-          { name: '4K Monitor', url: 'products.html#monitor' },
-          { name: 'Gaming Mouse', url: 'products.html#mouse' },
-          { name: 'Bluetooth Speaker', url: 'products.html#speaker' },
-          { name: 'Laptop Stand', url: 'products.html#laptopstand' },
-          { name: 'Noise Cancelling Earbuds', url: 'products.html#noisecancelling' },
-          { name: 'Fitness Tracker', url: 'products.html#fitnesstracker' },
-          { name: 'HD Webcam', url: 'products.html#webcam' },
-          { name: 'E-reader', url: 'products.html#ereader' },
-          { name: 'Action Camera', url: 'products.html#actioncamera' }
-        ]
-      };
-    </script>
-    <script src="chatbot.js"></script>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">🛍️</span>
+        <h1 class="title">My Store</h1>
+      </div>
+      <nav class="header-actions" aria-label="Main navigation">
+        <a href="index.html" class="nav-link active" aria-current="page">Home</a>
+        <a href="products.html" class="nav-link">Products</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-    <!-- Telegram Bot Integration -->
-    <script>
-    async function sendMessage() {
-      const text = document.getElementById("messageInput").value;
-      // Replace with your chatId from Telegram
-      const chatId = "N8Nchat_w"; 
+  <main class="container" id="main-content" tabindex="-1">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="animated-logo pulse" aria-hidden="true">🛍️</div>
+      <h1 id="heroTitle">Welcome to My Store</h1>
+      <p>Discover amazing products with our AI-powered shopping experience</p>
+      <div class="cta-buttons">
+        <a href="products.html" class="cta-btn cta-primary">Shop Now</a>
+        <a href="dashboard.html" class="cta-btn cta-secondary">View Dashboard</a>
+      </div>
+    </section>
 
-      await fetch("http://localhost:3000/sendMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId, text })
-      });
-    }
-  </script>
+    <section class="features" aria-labelledby="featuresTitle">
+      <h2 class="visually-hidden" id="featuresTitle">Store Features</h2>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3 class="feature-title">Fast Delivery</h3>
+        <p class="feature-desc">Get your orders delivered within 24 hours with our premium shipping service.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3 class="feature-title">AI Assistant</h3>
+        <p class="feature-desc">Get instant help with our smart chatbot powered by advanced AI technology.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3 class="feature-title">Premium Quality</h3>
+        <p class="feature-desc">All our products are carefully selected and tested for the highest quality standards.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Smart Analytics</h3>
+        <p class="feature-desc">Track your orders and get insights with our comprehensive dashboard system.</p>
+      </div>
+    </section>
+  </main>
 
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> My Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ✅ Your custom Chat Widget stays exactly as it is -->
+  <button id="chatToggle" class="chat-toggle" aria-label="Open chat" aria-haspopup="dialog">💬</button>
+  <div id="chatWidget" class="chat-widget" hidden role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="chat-header">
+      <div class="chat-title" id="chatTitle">Chat with us</div>
+      <button id="chatClose" class="chat-close" aria-label="Close chat">×</button>
+    </div>
+    <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+    <form id="chatForm" class="chat-form" autocomplete="off">
+      <input id="chatInput" class="chat-input" type="text" placeholder="Type your message..." aria-label="Type your message" required />
+      <button class="chat-send" type="submit">Send</button>
+    </form>
+  </div>
+
+    <!-- n8n Chat Styles -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<script type="module">
+	import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+	createChat({
+		webhookUrl: 'http://localhost:5678/webhook/6b7bc309-9611-4c6c-b45d-b2b52265d3bf/chat'
+	});
+</script>
 </body>
 </html>
-
